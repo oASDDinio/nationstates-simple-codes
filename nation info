@@ -1,0 +1,34 @@
+import requests
+import xml.etree.ElementTree as ET
+
+
+nation_name = "example_nation"
+
+
+api_key = "your_api_key"
+
+
+url = f"https://www.nationstates.net/cgi-bin/api.cgi?nation={nation_name}&q=name+population+region+currency"
+
+# 
+headers = {
+    "User-Agent": "My Python Script",
+    "X-ApiKey": api_key
+}
+
+response = requests.get(url, headers=headers)
+
+
+root = ET.fromstring(response.content)
+
+
+nation_name = root.find("NAME").text
+population = int(root.find("POPULATION").text)
+region = root.find("REGION").text
+currency = root.find("CURRENCY").text
+
+
+print(f"Name: {nation_name}")
+print(f"Population: {population}")
+print(f"Region: {region}")
+print(f"Currency: {currency}")
