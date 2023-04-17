@@ -1,0 +1,58 @@
+// Set the NationStates API endpoint URL
+const api_url = "https://www.nationstates.net/cgi-bin/api.cgi";
+
+// Set your NationStates nation name
+const nation_name = "Your Nation Name";
+
+// Set your NationStates nation API key
+const api_key = "Your API Key";
+
+// Function to send a GET request to the NationStates API endpoint
+async function get_api_data(endpoint, params) {
+  let url = api_url + "?nation=" + nation_name + "&q=" + endpoint;
+  if (params !== null) {
+    Object.keys(params).forEach((key) => {
+      url += "&" + key + "=" + params[key];
+    });
+  }
+  const response = await fetch(url, {
+    headers: {
+      "X-Password": api_key,
+    },
+  });
+  if (response.ok) {
+    return await response.json();
+  } else {
+    throw new Error("Failed to get data from API");
+  }
+}
+
+// Function to get a list of defender endorsements
+async function get_defender_endorsements() {
+  const endorsements = await get_api_data("endorsements");
+  if (endorsements.nation !== undefined) {
+    return endorsements.nation.endorsements.split(",");
+  } else {
+    throw new Error("Failed to get defender endorsements");
+  }
+}
+
+// Function to get a list of nations endorsing the user
+async function get_endorsers() {
+  const endorsers = await get_api_data("endorsements", { "filter": "endorsing" });
+  if (endorsers.nations !== undefined) {
+    return endorsers.nations.split(",");
+  } else {
+    throw new Error("Failed to get endorsers");
+  }
+}
+
+// Example usage: get a list of nations to endorse
+async function get_nations_to_endorse() {
+  const defender_endorsements = await get_defender_endorsements();
+  const endorsers = await get_endorsers();
+  const nations_to_endorse = defender_endorsements.filter((nation) => !endorsers.includes(nation));
+  console.log("Nations to Endorse: " + nations_to_endorse.join(", "));
+}
+
+get_nations_to_endorse().catch((error) => console.error(error));
